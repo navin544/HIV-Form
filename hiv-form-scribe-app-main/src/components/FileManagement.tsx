@@ -90,241 +90,218 @@ export const FileManagement: React.FC = () => {
     const generateLabTable = () => {
       let labTests = [];
       
-      if (f.lab_investigations && Array.isArray(f.lab_investigations)) {
-        labTests = f.lab_investigations;
-      } else {
-        const maxLength = Math.max(
-          (f.lab_date || []).length,
-          (f.cd4 || []).length,
-          (f.viral_load || []).length,
-          (f.hemoglobin || []).length,
-          (f.tlc || []).length,
-          (f.alc || []).length,
-          (f.platelets || []).length,
-          (f.esr || []).length,
-          (f.blood_glucose_f || []).length,
-          (f.blood_glucose_pp || []).length,
-          (f.blood_glucose_r || []).length,
-          (f.urea || []).length,
-          (f.creatinine || []).length,
-          (f.sodium || []).length,
-          (f.potassium || []).length,
-          (f.calcium || []).length,
-          (f.phosphate || []).length,
-          (f.bilirubin || []).length,
-          (f.ast || []).length,
-          (f.alt || []).length,
-          (f.alp || []).length,
-          (f.albumin || []).length,
-          (f.globulin || []).length,
-          (f.hbsag || []).length,
-          (f.anti_hcv || []).length
-        );
-
-        for (let i = 0; i < maxLength; i++) {
-          labTests.push({
-            date: (f.lab_date || [])[i] || '',
-            cd4: (f.cd4 || [])[i] || '',
-            viral_load: (f.viral_load || [])[i] || '',
-            hemoglobin: (f.hemoglobin || [])[i] || '',
-            tlc: (f.tlc || [])[i] || '',
-            alc: (f.alc || [])[i] || '',
-            platelets: (f.platelets || [])[i] || '',
-            esr: (f.esr || [])[i] || '',
-            blood_glucose_f: (f.blood_glucose_f || [])[i] || '',
-            blood_glucose_pp: (f.blood_glucose_pp || [])[i] || '',
-            blood_glucose_r: (f.blood_glucose_r || [])[i] || '',
-            urea: (f.urea || [])[i] || '',
-            creatinine: (f.creatinine || [])[i] || '',
-            sodium: (f.sodium || [])[i] || '',
-            potassium: (f.potassium || [])[i] || '',
-            calcium: (f.calcium || [])[i] || '',
-            phosphate: (f.phosphate || [])[i] || '',
-            bilirubin: (f.bilirubin || [])[i] || '',
-            ast: (f.ast || [])[i] || '',
-            alt: (f.alt || [])[i] || '',
-            alp: (f.alp || [])[i] || '',
-            albumin: (f.albumin || [])[i] || '',
-            globulin: (f.globulin || [])[i] || '',
-            hbsag: (f.hbsag || [])[i],
-            anti_hcv: (f.anti_hcv || [])[i]
-          });
-        }
+      // Check if lab_tests exists and has data
+      if (f.lab_tests && Array.isArray(f.lab_tests) && f.lab_tests.length > 0) {
+        // Filter out empty objects
+        labTests = f.lab_tests.filter((test: any) => {
+          return test && Object.keys(test).length > 0 && Object.values(test).some(value => value !== '' && value !== null && value !== undefined);
+        });
       }
 
       if (labTests.length === 0) {
         return '<div style="text-align: center; color: #888; font-style: italic; padding: 20px;">No laboratory investigation data available.</div>';
       }
 
+      // Vertical axis structure - parameters as rows, tests as columns
+      const parameters = [
+        { key: 'date', label: 'Date' },
+        { key: 'cd4', label: 'CD4 Count' },
+        { key: 'viral_load', label: 'Viral Load' },
+        { key: 'hemoglobin', label: 'Hemoglobin (g/dL)' },
+        { key: 'tlc', label: 'Total Leukocyte Count' },
+        { key: 'alc', label: 'Absolute Lymphocyte Count' },
+        { key: 'platelets', label: 'Platelets' },
+        { key: 'esr', label: 'ESR (mm/hr)' },
+        { key: 'blood_glucose_f', label: 'Blood Glucose Fasting (mg/dL)' },
+        { key: 'blood_glucose_pp', label: 'Blood Glucose PP (mg/dL)' },
+        { key: 'blood_glucose_r', label: 'Blood Glucose Random (mg/dL)' },
+        { key: 'urea', label: 'Urea (mg/dL)' },
+        { key: 'creatinine', label: 'Creatinine (mg/dL)' },
+        { key: 'sodium', label: 'Sodium (mEq/L)' },
+        { key: 'potassium', label: 'Potassium (mEq/L)' },
+        { key: 'calcium', label: 'Calcium (mg/dL)' },
+        { key: 'phosphate', label: 'Phosphate (mg/dL)' },
+        { key: 'bilirubin', label: 'Total Bilirubin (mg/dL)' },
+        { key: 'ast', label: 'AST (IU/L)' },
+        { key: 'alt', label: 'ALT (IU/L)' },
+        { key: 'alp', label: 'ALP (IU/L)' },
+        { key: 'albumin', label: 'Albumin (g/dL)' },
+        { key: 'globulin', label: 'Globulin (g/dL)' },
+        { key: 'hbsag', label: 'HBsAg' },
+        { key: 'anti_hcv', label: 'Anti-HCV' }
+      ];
+
       let tableHTML = `
-        <table style="width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 9px;">
+        <table style="width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 10px; page-break-inside: avoid;">
           <thead>
             <tr style="background-color: #007bff; color: white;">
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Date</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">CD4</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Viral Load</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Hemoglobin</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">TLC</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">ALC</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Platelets</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">ESR</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Glucose (F)</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Glucose (PP)</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Glucose (R)</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Urea</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Creatinine</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Sodium</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Potassium</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Calcium</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Phosphate</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Bilirubin</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">AST</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">ALT</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">ALP</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Albumin</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Globulin</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">HBsAg</th>
-              <th style="border: 1px solid #ddd; padding: 6px; text-align: center;">Anti-HCV</th>
+              <th style="border: 1px solid #333; padding: 8px; text-align: left; font-weight: bold; width: 200px;">Parameter</th>
+      `;
+
+      // Add column headers for each test
+      labTests.forEach((_, index) => {
+        tableHTML += `<th style="border: 1px solid #333; padding: 8px; text-align: center; font-weight: bold; min-width: 80px;">Test ${index + 1}</th>`;
+      });
+
+      tableHTML += `
             </tr>
           </thead>
           <tbody>
       `;
 
-      labTests.forEach((test, i) => {
-        const bgColor = i % 2 === 0 ? '#f9f9f9' : '#ffffff';
+      // Add rows for each parameter
+      parameters.forEach((param, paramIndex) => {
+        const bgColor = paramIndex % 2 === 0 ? '#f9f9f9' : '#ffffff';
         tableHTML += `
           <tr style="background-color: ${bgColor};">
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.date || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.cd4 || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.viral_load || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.hemoglobin || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.tlc || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.alc || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.platelets || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.esr || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.blood_glucose_f || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.blood_glucose_pp || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.blood_glucose_r || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.urea || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.creatinine || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.sodium || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.potassium || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.calcium || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.phosphate || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.bilirubin || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.ast || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.alt || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.alp || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.albumin || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.globulin || '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.hbsag === true ? 'Positive' : test.hbsag === false ? 'Negative' : '-'}</td>
-            <td style="border: 1px solid #ddd; padding: 4px; text-align: center;">${test.anti_hcv === true ? 'Positive' : test.anti_hcv === false ? 'Negative' : '-'}</td>
-          </tr>
+            <td style="border: 1px solid #333; padding: 6px; font-weight: bold; background-color: #f0f0f0;">${param.label}</td>
         `;
+
+        labTests.forEach((test) => {
+          let cellValue = test[param.key] || '-';
+          
+          // Handle boolean values for HBsAg and Anti-HCV
+          if (param.key === 'hbsag' || param.key === 'anti_hcv') {
+            if (cellValue === true) cellValue = 'Positive';
+            else if (cellValue === false) cellValue = 'Negative';
+            else cellValue = '-';
+          }
+          
+          // Handle empty string values
+          if (cellValue === '') cellValue = '-';
+          
+          tableHTML += `<td style="border: 1px solid #333; padding: 6px; text-align: center;">${cellValue}</td>`;
+        });
+
+        tableHTML += '</tr>';
       });
 
-      tableHTML += '</tbody></table>';
+      tableHTML += `
+          </tbody>
+        </table>
+      `;
+
       return tableHTML;
     };
 
     return `
-      <div class="form-container" style="page-break-after: always; margin-bottom: 30px; border: 1px solid #ccc; padding: 20px;">
-        <div class="form-header" style="background-color: #f5f5f5; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
-          <h2>HIV Patient Assessment Form</h2>
-          <div><strong>Form ID:</strong> ${form.id}</div>
-          <div><strong>Patient Name:</strong> ${form.patient_name}</div>
-          <div><strong>Date Created:</strong> ${form.date_created}</div>
+      <div class="form-container" style="page-break-after: always; margin-bottom: 30px; border: 2px solid #333; padding: 20px; font-family: Arial, sans-serif;">
+        <div class="form-header" style="background-color: #f5f5f5; padding: 15px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #ddd;">
+          <h1 style="text-align: center; color: #007bff; margin: 0 0 15px 0; font-size: 24px; font-weight: bold;">Patient Report</h1>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <div><strong>Form ID:</strong> ${form.id}</div>
+            <div><strong>Date Created:</strong> ${form.date_created}</div>
+          </div>
+          <div style="text-align: center; font-size: 18px;"><strong>Patient Name:</strong> ${form.patient_name}</div>
         </div>
 
         <div class="form-section" style="margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 15px; border-radius: 5px;">
-          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px;">Patient Demographics</h4>
-          <div><strong>Age:</strong> ${format(f.age)}</div>
-          <div><strong>Sex:</strong> ${format(f.sex)}</div>
-          <div><strong>ID Number:</strong> ${format(f.id_no)}</div>
-          <div><strong>Address:</strong> ${format(f.address)}</div>
-          <div><strong>Telephone:</strong> ${format(f.telephone)}</div>
-          <div><strong>Enrollment Date:</strong> ${format(f.enroll_date)}</div>
+          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">Patient Demographics</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><strong>Age:</strong> ${format(f.age)}</div>
+            <div><strong>Sex:</strong> ${format(f.sex)}</div>
+            <div><strong>ID Number:</strong> ${format(f.id_no)}</div>
+            <div><strong>Address:</strong> ${format(f.address)}</div>
+            <div><strong>Telephone:</strong> ${format(f.telephone)}</div>
+            <div><strong>Enrollment Date:</strong> ${format(f.enroll_date)}</div>
+          </div>
         </div>
 
         <div class="form-section" style="margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 15px; border-radius: 5px;">
-          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px;">Socio-Economic & Marital Information</h4>
-          <div><strong>Education:</strong> ${format(f.education)}</div>
-          <div><strong>Occupation:</strong> ${format(f.occupation)}</div>
-          <div><strong>Marital Status:</strong> ${format(f.marital_status)}</div>
-          <div><strong>Living with Family:</strong> ${format(f.living_with_family)}</div>
-          <div><strong>Contraceptives:</strong> ${format(f.contraceptives)}</div>
-          <div><strong>Heard of AIDS:</strong> ${format(f.heard_of_aids)}</div>
-          <div><strong>Habits:</strong> ${format(f.habits)}</div>
+          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">Socio-Economic & Marital Information</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><strong>Education:</strong> ${format(f.education)}</div>
+            <div><strong>Occupation:</strong> ${format(f.occupation)}</div>
+            <div><strong>Marital Status:</strong> ${format(f.marital_status)}</div>
+            <div><strong>Living with Family:</strong> ${format(f.living_with_family)}</div>
+            <div><strong>Contraceptives:</strong> ${format(f.contraceptives)}</div>
+            <div><strong>Heard of AIDS:</strong> ${format(f.heard_of_aids)}</div>
+            <div><strong>Habits:</strong> ${format(f.habits)}</div>
+          </div>
         </div>
 
         <div class="form-section" style="margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 15px; border-radius: 5px;">
-          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px;">Clinical History</h4>
-          <div><strong>Symptoms:</strong> ${format(f.symptoms)}</div>
-          <div><strong>TB Past History:</strong> ${format(f.tb_past_history)}</div>
-          <div><strong>TB Present History:</strong> ${format(f.tb_present_history)}</div>
-          <div><strong>ATT Initiation Date:</strong> ${format(f.att_initiation_date)}</div>
+          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">Clinical History</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><strong>Symptoms:</strong> ${format(f.symptoms)}</div>
+            <div><strong>TB Past History:</strong> ${format(f.tb_past_history)}</div>
+            <div><strong>TB Present History:</strong> ${format(f.tb_present_history)}</div>
+            <div><strong>ATT Initiation Date:</strong> ${format(f.att_initiation_date)}</div>
+          </div>
         </div>
 
         <div class="form-section" style="margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 15px; border-radius: 5px;">
-          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px;">Physical Examination</h4>
-          <div><strong>Physical Symptoms:</strong> ${format(f.physical_symptoms)}</div>
-          <div><strong>Weight:</strong> ${format(f.weight)} kg</div>
-          <div><strong>BMI:</strong> ${format(f.bmi)}</div>
-          <div><strong>Weight Loss:</strong> ${format(f.weight_loss)} kg</div>
-          <div><strong>Symptoms Duration:</strong> ${format(f.symptoms_duration)} weeks</div>
-          <div><strong>Mantoux Test:</strong> ${format(f.mantoux_test)} mm</div>
-          <div><strong>Bacillary Load:</strong> ${format(f.bacillary_load)}</div>
-          <div><strong>BCG Vaccine:</strong> ${format(f.bcg_vaccine)}</div>
+          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">Physical Examination</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><strong>Physical Symptoms:</strong> ${format(f.physical_symptoms)}</div>
+            <div><strong>Weight:</strong> ${format(f.weight)} kg</div>
+            <div><strong>BMI:</strong> ${format(f.bmi)}</div>
+            <div><strong>Weight Loss:</strong> ${format(f.weight_loss)} kg</div>
+            <div><strong>Symptoms Duration:</strong> ${format(f.symptoms_duration)} weeks</div>
+            <div><strong>Mantoux Test:</strong> ${format(f.mantoux_test)} mm</div>
+            <div><strong>Bacillary Load:</strong> ${format(f.bacillary_load)}</div>
+            <div><strong>BCG Vaccine:</strong> ${format(f.bcg_vaccine)}</div>
+          </div>
         </div>
 
         <div class="form-section" style="margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 15px; border-radius: 5px;">
-          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px;">TB Classification</h4>
-          <div><strong>PTB Symptoms:</strong> ${format(f.ptb_symptoms)}</div>
-          <div><strong>TB Type:</strong> ${format(f.tb_type)}</div>
-          <div><strong>Pleural Effusion:</strong> ${format(f.pleural_effusion)}</div>
-          <div><strong>Smear/Culture Results:</strong> ${format(f.smear_culture_results)}</div>
+          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">TB Classification</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><strong>PTB Symptoms:</strong> ${format(f.ptb_symptoms)}</div>
+            <div><strong>TB Type:</strong> ${format(f.tb_type)}</div>
+            <div><strong>Pleural Effusion:</strong> ${format(f.pleural_effusion)}</div>
+            <div><strong>Smear/Culture Results:</strong> ${format(f.smear_culture_results)}</div>
+          </div>
         </div>
 
         <div class="form-section" style="margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 15px; border-radius: 5px;">
-          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px;">Risk Factors & Exposure History</h4>
-          <div><strong>Exposure:</strong> ${format(f.exposure)}</div>
-          <div><strong>Sex Risk Group:</strong> ${format(f.sex_risk_group)}</div>
-          <div><strong>HIV Cause:</strong> ${format(f.hiv_cause)}</div>
-          <div><strong>Transmission Category:</strong> ${format(f.transmission_category)}</div>
-          <div><strong>Last Transfusion Date:</strong> ${format(f.last_transfusion_date)}</div>
-          <div><strong>Transfusion Place:</strong> ${format(f.last_transfusion_place)}</div>
-          <div><strong>Occupational Exposure:</strong> ${format(f.occupational_exposure)}</div>
-          <div><strong>Sexual Partners:</strong> ${format(f.sexual_partners)}</div>
-          <div><strong>Tattooed:</strong> ${format(f.tattooed)}</div>
+          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">Risk Factors & Exposure History</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><strong>Exposure:</strong> ${format(f.exposure)}</div>
+            <div><strong>Sex Risk Group:</strong> ${format(f.sex_risk_group)}</div>
+            <div><strong>HIV Cause:</strong> ${format(f.hiv_cause)}</div>
+            <div><strong>Transmission Category:</strong> ${format(f.transmission_category)}</div>
+            <div><strong>Last Transfusion Date:</strong> ${format(f.last_transfusion_date)}</div>
+            <div><strong>Transfusion Place:</strong> ${format(f.last_transfusion_place)}</div>
+            <div><strong>Occupational Exposure:</strong> ${format(f.occupational_exposure)}</div>
+            <div><strong>Sexual Partners:</strong> ${format(f.sexual_partners)}</div>
+            <div><strong>Tattooed:</strong> ${format(f.tattooed)}</div>
+          </div>
         </div>
 
         <div class="form-section" style="margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 15px; border-radius: 5px;">
-          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px;">HIV-Related Illnesses</h4>
-          <div><strong>Illnesses:</strong> ${format(f.illnesses)}</div>
-          <div><strong>Other Illnesses:</strong> ${format(f.other_illnesses)}</div>
+          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">HIV-Related Illnesses</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><strong>Illnesses:</strong> ${format(f.illnesses)}</div>
+            <div><strong>Other Illnesses:</strong> ${format(f.other_illnesses)}</div>
+          </div>
         </div>
 
         <div class="form-section" style="margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 15px; border-radius: 5px;">
-          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px;">Treatment Information</h4>
-          <div><strong>ART Type:</strong> ${format(f.art_type)}</div>
-          <div><strong>ART Initiation Date:</strong> ${format(f.art_initiation_date)}</div>
-          <div><strong>ATT Treatment Details:</strong> ${format(f.att_treatment_details)}</div>
-          <div><strong>ATT Treatment Date:</strong> ${format(f.att_treatment_date)}</div>
-          <div><strong>Other Treatments:</strong> ${format(f.other_treatments)}</div>
-          <div><strong>Treatment Description:</strong> ${format(f.other_treatment_desc)}</div>
+          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">Treatment Information</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><strong>ART Type:</strong> ${format(f.art_type)}</div>
+            <div><strong>ART Initiation Date:</strong> ${format(f.art_initiation_date)}</div>
+            <div><strong>ATT Treatment Details:</strong> ${format(f.att_treatment_details)}</div>
+            <div><strong>ATT Treatment Date:</strong> ${format(f.att_treatment_date)}</div>
+            <div><strong>Other Treatments:</strong> ${format(f.other_treatments)}</div>
+            <div><strong>Treatment Description:</strong> ${format(f.other_treatment_desc)}</div>
+          </div>
         </div>
 
         <div class="form-section" style="margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 15px; border-radius: 5px;">
-          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px;">Radiology Findings</h4>
-          <div><strong>Radiograph Result:</strong> ${format(f.radiograph_result)}</div>
-          <div><strong>Unilateral/Bilateral:</strong> ${format(f.unilateral_bilateral)}</div>
-          <div><strong>Severity:</strong> ${format(f.severity)}</div>
-          <div><strong>Cavity Type:</strong> ${format(f.cavity_type)}</div>
-          <div><strong>Cavity Number:</strong> ${format(f.cavity_number)}</div>
+          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">Radiology Findings</h4>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div><strong>Radiograph Result:</strong> ${format(f.radiograph_result)}</div>
+            <div><strong>Unilateral/Bilateral:</strong> ${format(f.unilateral_bilateral)}</div>
+            <div><strong>Severity:</strong> ${format(f.severity)}</div>
+            <div><strong>Cavity Type:</strong> ${format(f.cavity_type)}</div>
+            <div><strong>Cavity Number:</strong> ${format(f.cavity_number)}</div>
+          </div>
         </div>
 
-        <div class="form-section" style="margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 15px; border-radius: 5px;">
-          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px;">Laboratory Investigations</h4>
+        <div class="form-section" style="margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 15px; border-radius: 5px; page-break-inside: avoid;">
+          <h4 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; font-size: 16px;">Laboratory Investigations</h4>
           ${generateLabTable()}
         </div>
       </div>
@@ -344,24 +321,26 @@ export const FileManagement: React.FC = () => {
       <!DOCTYPE html>
       <html>
       <head>
-        <title>HIV Forms Export</title>
+        <title>Patient Reports Export</title>
         <style>
           body { 
             font-family: Arial, sans-serif; 
             margin: 20px; 
             font-size: 12px;
+            line-height: 1.4;
           }
           .form-container { 
             page-break-after: always; 
             margin-bottom: 30px; 
-            border: 1px solid #ccc; 
+            border: 2px solid #333; 
             padding: 20px; 
           }
           .form-header { 
             background-color: #f5f5f5; 
-            padding: 10px; 
+            padding: 15px; 
             margin-bottom: 20px; 
             border-radius: 5px;
+            border: 1px solid #ddd;
           }
           .form-section { 
             margin-bottom: 20px; 
@@ -374,6 +353,28 @@ export const FileManagement: React.FC = () => {
             border-bottom: 2px solid #007bff; 
             padding-bottom: 8px; 
             margin-bottom: 15px;
+            font-size: 16px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 10px;
+            page-break-inside: avoid;
+          }
+          th, td {
+            border: 1px solid #333;
+            padding: 6px;
+            text-align: left;
+          }
+          th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+          }
+          tr:nth-child(even) {
+            background-color: #f9f9f9;
           }
           @media print { 
             .form-container { 
@@ -381,6 +382,9 @@ export const FileManagement: React.FC = () => {
             }
             body {
               font-size: 11px;
+            }
+            table {
+              page-break-inside: avoid;
             }
           }
         </style>
