@@ -196,7 +196,7 @@ export const HIVForm: React.FC = () => {
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-center text-gray-800">
-            {isEditing ? 'Edit HIV Form' : 'HIV Assessment Form'}
+            {isEditing ? 'Edit HIV Form' : 'Patient Details'}
           </h1>
           {isEditing && (
             <p className="text-center text-gray-600 mt-2">
